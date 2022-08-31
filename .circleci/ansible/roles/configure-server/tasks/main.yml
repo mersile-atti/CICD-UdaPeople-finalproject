@@ -18,7 +18,7 @@
   - name: install nodejs 13
     become: true
     apt:
-      name: [ "nodejs"]
+      name: ["nodejs", "npm"]
       state: latest
       update_cache: yes
 

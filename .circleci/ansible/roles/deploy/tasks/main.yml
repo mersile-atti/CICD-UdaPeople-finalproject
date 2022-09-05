@@ -1,0 +1,13 @@
+---
+
+- name: Extract files
+  become: true
+  unarchive:
+    src: files/artifact.tar.gz
+    dest: .
+
+- name: Start the web server
+  become: true
+  shell: |
+    pm2 stop default
+    pm2 start npm -- start

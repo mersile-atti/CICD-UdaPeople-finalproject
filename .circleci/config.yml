@@ -321,10 +321,14 @@ jobs:
             apk add --update --no-cache tar gzip nodejs npm aws-cli curl
       - run:
           name: Get backend url
-          command: |
-            export BACKEND_IP=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople" --output text)
+          command: |            
+            export BACKEND_IP=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --output text)
             export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> backend/.env
             sleep 3m
             if curl "${API_URL}/api/status" | grep "ok"
             then
@@ -332,6 +336,7 @@ jobs:
             else
               return 1
             fi
+
       - run:
           name: Frontend smoke test.
           command: |

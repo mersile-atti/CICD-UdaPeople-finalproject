@@ -11,3 +11,89 @@
   shell: |
     pm2 stop default
     pm2 start npm -- start
+
+- name: "update apt package."
+  become: yes
+  apt:
+    update_cache: yes
+ 
+- name: "update packages"
+  become: yes
+  apt:
+    upgrade: yes
+    
+- name: "Remove dependencies that are no longer required"
+  become: yes
+  apt:
+    autoremove: yes   
+   
+    
+- name: "Install Dependencies"
+  become: yes
+  apt:
+    name: ["nodejs", "npm"]
+    state: latest
+    update_cache: yes
+
+- name: Install pm2
+  become: yes
+  npm:
+    name: pm2
+    global: yes
+    production: yes
+    state: present
+
+- name: Creates Directory
+  become: yes
+  file:
+    path: ~/backend
+    state: directory
+    mode: 0755
+
+- name: Copy backend dist files web server
+  become: yes
+  copy:
+    src: ~/project/artifact.tar.gz
+    dest: ~/backend/artifact.tar.gz
+    #dest: /home/ubuntu/backend/artifact.tar.gz
+    
+- name: Extract backend files
+  become: yes
+  shell: |
+    cd ~/backend
+    tar -vxf artifact.tar.gz
+    
+- name: NPM install
+  become: true    
+  command: npm install
+  args:
+    chdir: /root/backend
+  register: shell_output
+- name: NPM build
+  become: true  
+  command: npm run build
+  args:
+    chdir: /root/backend    
+  register: shell_output
+ 
+- name: PM2 start backend
+  become: true  
+  command: pm2 start npm --name "backend" -- run start
+  args:
+    chdir: /root/backend  
+  register: shell_output  
+
+- name: PM2 check backend status in pm2
+  become: true
+  command: pm2 status
+  args:
+    chdir: /root/backend  
+  register: shell_output  
+
+- name: PM2 start main
+  become: true
+  command: pm2 start main.js --update-env
+  args:
+    chdir: /root/backend/dist    
+  register: shell_output
+- debug: var=shell_output

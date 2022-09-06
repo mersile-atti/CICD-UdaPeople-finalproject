@@ -319,11 +319,19 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            BACKEND_IP=$(aws ec2 describe-instances \
-            --filters "Name=tag:Name, Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            export BACKEND_IP=$(aws ec2 describe-instances \
+            --filters "Name=tag:project,Values=udapeople" \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text)
-            curl "http://${BACKEND_IP}:3030/api/status"
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+            sleep 3m
+            if curl "${API_URL}/api/status" | grep "ok"
+            then
+              return 0
+            else
+              return 1
+            fi
       - run:
           name: Frontend smoke test.
           command: |

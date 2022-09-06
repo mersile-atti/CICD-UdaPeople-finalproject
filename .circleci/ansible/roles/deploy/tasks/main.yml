@@ -53,14 +53,14 @@
 - name: Copy backend dist files web server
   become: yes
   copy:
-    src: ~/project/artifact.tar.gz
-    dest: ~/backend/artifact.tar.gz
-    #dest: /home/ubuntu/backend/artifact.tar.gz
+    src: files/artifact.tar.gz
+    dest: .
+
     
 - name: Extract backend files
   become: yes
   shell: |
-    cd ~/backend
+    cd backend
     tar -vxf artifact.tar.gz
     
 - name: NPM install

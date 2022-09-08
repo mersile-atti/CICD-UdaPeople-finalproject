@@ -51,7 +51,7 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-
+  
   build-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -428,6 +428,9 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
+          filters:
+            branches:
+              only: [dev-branch]
       - deploy-backend:
           requires: [run-migrations]
       - smoke-test:

@@ -1,0 +1,32 @@
+[1mdiff --git a/.circleci/ansible/deploy-backend.yml b/.circleci/ansible/deploy-backend.yml[m
+[1mindex 53575e4..699c9a1 100644[m
+[1m--- a/.circleci/ansible/deploy-backend.yml[m
+[1m+++ b/.circleci/ansible/deploy-backend.yml[m
+[36m@@ -30,3 +30,4 @@[m
+ [m
+   roles:[m
+     - deploy[m
+[32m+[m[32m    - configure-prometheus-node-exporter[m
+[1mdiff --git a/.circleci/config.yml b/.circleci/config.yml[m
+[1mindex d50e79c..b669515 100644[m
+[1m--- a/.circleci/config.yml[m
+[1m+++ b/.circleci/config.yml[m
+[36m@@ -51,7 +51,7 @@[m [mjobs:[m
+       - save_cache:[m
+           paths: [frontend/node_modules][m
+           key: frontend-build[m
+[31m-[m
+[32m+[m[41m  [m
+   build-backend:[m
+     docker:[m
+       - image: circleci/node:13.8.0[m
+[36m@@ -428,6 +428,9 @@[m [mworkflows:[m
+           requires: [configure-infrastructure][m
+       - deploy-frontend:[m
+           requires: [run-migrations][m
+[32m+[m[32m          filters:[m
+[32m+[m[32m            branches:[m
+[32m+[m[32m              only: [dev-branch][m
+       - deploy-backend:[m
+           requires: [run-migrations][m
+       - smoke-test:[m

@@ -350,7 +350,10 @@ jobs:
       - image: python:3.10-alpine3.16
     steps:
       - checkout
-      - run: yum install -y tar gzip
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update --no-cache curl nodejs npm tar gzip aws-cli
       - run:
           name: store oldWorkflow ID
           command: |
@@ -385,9 +388,9 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install dependencies
+          name: Install tar utility
           command: |
-            apk add --update --no-cache curl nodejs npm tar gzip aws-cli
+            yum install -y tar gzip
       - attach_workspace:
           at: ~/
       - run:

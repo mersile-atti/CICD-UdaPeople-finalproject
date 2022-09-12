@@ -387,6 +387,10 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update --no-cache curl nodejs npm tar gzip aws-cli
       - attach_workspace:
           at: ~/
       - run:

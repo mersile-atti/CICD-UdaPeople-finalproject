@@ -362,7 +362,7 @@ jobs:
                     --no-paginate --output text > ~/oldworkflowid.txt
             export WorkflowID=$(cat ~/oldworkflowid.txt)
             echo WorkflowID: "$WorkflowID"
-       - persist_to_workspace:
+      - persist_to_workspace:
           root: ~/
           paths:
             - oldworkflowid.txt
@@ -395,7 +395,7 @@ jobs:
             # Fetch the Old workflow ID
             export OldWorkflowID=$(cat ~/oldworkflowid.txt)
             CurrentWorkflowID=${CIRCLE_WORKFLOW_ID:0:7}
-            
+
             if [[ "$CurrentWorkflowID" != "${OldWorkflowID}" ]]
             then
               echo "-------------------Delete Confirmed---------------------"

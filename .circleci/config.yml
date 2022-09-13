@@ -250,25 +250,13 @@ jobs:
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
       - run:
-          name: store oldWorkflow ID
-          command: |
-            aws cloudformation \
-                    list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
-                    --no-paginate --output text > ~/OldWorkflowID.txt
-            export WorkflowID=$(cat ~/OldWorkflowID.txt)
-            echo WorkflowID: "$WorkflowID"
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - OldWorkflowID.txt
-      - run:
           name: Deploy frontend objects
           command: |
             cd frontend
             npm install
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-            aws s3 cp dist s3://udapeople-id --recursive
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment:
           workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
@@ -343,7 +331,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            URL="http://udapeople-id.s3-website-us-east-1.amazonaws.com/#/employees"            
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
             echo ${URL} 
             if curl -s ${URL} | grep "Welcome"
             then
@@ -365,13 +353,14 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update --no-cache curl nodejs npm tar gzip aws-cli
-      - attach_workspace:
-          at: ~/
       - run:
           name: Update cloudfront distribution
           command: |
-            export OldWorkflowID=$(cat ~/OldWorkflowID.txt)
-
+            export OldWorkflowID=$(aws cloudformation \
+                        list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                        --no-paginate --output text)
+            echo $OldWorkflowID >> ~/OldWorkflowID.txt
+            cat ~/OldWorkflowID.txt
             aws cloudformation deploy \
                 --template-file .circleci/files/cloudfront.yml \
                 --stack-name InitialStack \
@@ -391,15 +380,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install tar utility
-          command: |
-            yum install -y tar gzip
-      - attach_workspace:
-          at: ~/
-      - run:
           name: Clean up oldStack Workflow ID
           command: | 
-            export OldWorkflowID=$(cat ~/OldWorkflowID.txt)
+            export OldWorkflowID=$(aws cloudformation \
+                    list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                    --no-paginate --output text)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
@@ -409,9 +394,11 @@ jobs:
             if [[ "${STACKS[@]}" != "${OldWorkflowID}" ]]
             then
               echo "-------------------Delete Confirmed---------------------"
-              export OldWorkflowID=$(cat ~/OldWorkflowID.txt)
+              export OldWorkflowID=$(aws cloudformation \
+                    list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+                    --no-paginate --output text)
               echo "s3://${OldWorkflowID}"
-              aws s3 rm "s3://udapoeple-id" --recursive
+              aws s3 rm "s3://${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"
               aws cloudformation delete-stack --stack-name "frontend-${OldWorkflowID}"
             else

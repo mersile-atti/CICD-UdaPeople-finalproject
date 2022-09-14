@@ -392,7 +392,7 @@ jobs:
       - run:
           name: Clean up oldStack Workflow ID
           command: | 
-            export WorkflowID=$(cat ~/OldWorkflowID.txt)
+            export OldWorkflowID=$(cat ~/OldWorkflowID.txt)
             echo OldWorkflowID: "${OldWorkflowID}"
             echo CIRCLE_WORKFLOW_ID "${CIRCLE_WORKFLOW_ID:0:7}"
             export STACKS=($(aws cloudformation list-stacks --query "StackSummaries[*].StackName" \
@@ -402,7 +402,7 @@ jobs:
             if [[ "${STACKS[@]}" != "${OldWorkflowID}" ]]
             then
               echo "-------------------Delete Confirmed---------------------"
-              export WorkflowID=$(cat ~/OldWorkflowID.txt)
+              export OldWorkflowID=$(cat ~/OldWorkflowID.txt)
               echo "s3://udapeople-${OldWorkflowID}"
               aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
               aws cloudformation delete-stack --stack-name "backend-${OldWorkflowID}"

@@ -1,4 +1,4 @@
 ---- URL to my public GitHub repository. [URL01]
 https://github.com/mersile-atti/CICD-UdaPeople-finalproject.git
 -----public URL for my S3 Bucket. [URL02]
-udapeople-mybucket417689156654.s3.amazonaws.com
+udapeople-96ee426.s3.amazonaws.com
